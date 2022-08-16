@@ -35,9 +35,6 @@ export default {
         }
     },
     methods:{
-        random(min, max) {
-            return Math.random() * (max - min) + min;
-        },
         fetchWeatherReport(){
             (async ()=>{
                 const res = await axios.post("http://localhost:8000/getWeather", {
