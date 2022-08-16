@@ -4,7 +4,10 @@
         <div class="py-6 space-x-2">
             <form @submit.prevent="fetchWeatherReport" class="flex flex-row gap-x-1">
                 <search-bar class="basis-3/4" v-model="searchtext" />
-                <button class="basis-1/4 border-gray-600 hover:border-gray-500 hover:shadow-lg hover:shadow-zinc-900 border-2">Search</button>
+                <button class="basis-1/4 border-zinc-700 justify-center inline-flex items-center px-4 py-2 text-lg text-white transition ease-in-out duration-150 hover:border-zinc-500 shadow-md hover:shadow-lg hover:shadow-zinc-900 border-2">
+                    <template v-if="loading"><Indicator /></template>
+                    Search
+                </button>
             </form>
         </div>
         <div class="mt-6">
@@ -21,29 +24,39 @@
 <script>
 import SearchBar from './components/SearchBar.vue';
 import TempCard from './components/TempCard.vue';
+import Indicator from './components/Indicator.vue';
 import axios from "axios";
 export default {
     name: "Frame",  
-    components: {SearchBar, TempCard},
+    components: {SearchBar, TempCard, Indicator},
     data:()=>({
         searchtext: "",
-        weatherReport: {}
+        weatherReport: {},
+        loading: false,
     }),
     computed:{
         cities(){
-            return this.searchtext.split(",");
+            let out = this.searchtext.replaceAll(' ', '');
+            if(out.length>1){
+                out = out.split(",");
+            }
+            return out;
         }
     },
     methods:{
         fetchWeatherReport(){
-            (async ()=>{
-                const res = await axios.post("http://localhost:8000/getWeather", {
-                    cities: this.cities,
-                });
-                if(res.data){
-                    this.weatherReport = res.data.weather;
-                }
-            })();
+            if(this.cities.length > 0){
+                this.loading = true;
+                (async ()=>{
+                    const res = await axios.post("http://localhost:8000/getWeather", {
+                        cities: this.cities,
+                    });
+                    if(res.data){
+                        this.weatherReport = res.data.weather;
+                    }
+                    this.loading = false;
+                })();
+            }
         }
     }
 }
